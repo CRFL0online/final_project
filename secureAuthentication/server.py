@@ -27,18 +27,25 @@ def server_start():
             username = client_socket.recv(1024).decode("utf-8")
             client_socket.send("Insert Password:".encode("utf-8"))
             password = client_socket.recv(1024).decode("utf-8")
-            if(check_credentials(username,password)):
-                print("Login successful")
+            if (check_credentials(username,password)):
+                print("Client connected")
                 client_socket.send("Login successful".encode("utf-8"))
-                handle_client(client_socket)
+                handle_client(client_socket, addr)
+                break
             else:
-                client_socket.send("Login failure")
-                
-                
+                client_socket.send("Login failure".encode("utf-8"))
                 print(f"Client connection at address {addr} closed")
+                break
+
         except Exception as e:
                 print(f"Error handling connection from {addr}: {e}")
-                client_socket.close()
+
+        break
+
+    server.close()
+    print("Server Closed")
+
+    return 0
     
 #def function that checks for the user credential (no hash yet)
 def check_credentials(username, password):
@@ -50,19 +57,19 @@ def check_credentials(username, password):
     return False
 
 def handle_client(client_socket, addr):
-    try:
-        while True:
-            response = client_socket.recv(1024)
-            response = response.decode("utf-8")
-            if (response.lower=="close"):
-                break
-            else:
-                print(response)
-                data = "Message Received".encode("utf-8")
-                client_socket.send(data)
-    finally:
-        client_socket.close()
-        print(f"Client connection at address {addr} closed")
+
+    while True:
+        response = client_socket.recv(1024)
+        response = response.decode("utf-8")
+        if (response.lower == "close"):
+            client_socket.close()
+            print(f"Client connection at address {addr} closed")
+            return 0
+        else:
+            print(response)
+            data = "Message Received".encode("utf-8")
+            client_socket.send(data)
+
         
 
 if __name__ == '__main__':
