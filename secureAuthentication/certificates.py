@@ -6,7 +6,7 @@ def create_self_signed_cert(cert_dir):
         os.makedirs(cert_dir)
 
     cert_file = os.path.join(cert_dir, "selfsigned.crt")
-    key_file = os.path.join(cert_dir, "private_key")
+    key_file = os.path.join(cert_dir, "private.key")
 
     k = crypto.PKey()
     k.generate_key(crypto.TYPE_RSA, 1024)

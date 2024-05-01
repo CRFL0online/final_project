@@ -2,10 +2,9 @@ import socket
 import ssl
 
 #define function to initialize socket connection
-
 def server_start():
     HOST = "127.0.0.1"
-    port = 54321
+    port = 443
 
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_verify_locations('selfsigned.crt')
@@ -15,17 +14,17 @@ def server_start():
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.bind((HOST, port))
         print("Socket successfully created")
-
     except socket.error as err:
         print("socket creation failed with error %s" % (err))
         return
 
     server.listen(5)
-    secure_server = context.wrap_socket(server, server_side=True)
+    client_socket, addr = server.accept()
+
     print("Server accepting connections\n")
-    
-    client_socket, addr = secure_server.accept()
     print(f"Accepted Connection from client address {addr}")
+    secure_server = context.wrap_socket(server, server_side=True)
+
     #secure_server = context.wrap_socket(server, server_side=True)
     while True:
     
