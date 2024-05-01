@@ -4,7 +4,8 @@ import ssl
 #define function to initialize socket connection
 def server_start():
     HOST = "127.0.0.1"
-    port = 443
+    port = 54321
+
 
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_verify_locations('selfsigned.crt')
@@ -23,7 +24,7 @@ def server_start():
 
     print("Server accepting connections\n")
     print(f"Accepted Connection from client address {addr}")
-    secure_server = context.wrap_socket(server, server_side=True)
+    secure_server = context.wrap_socket(client_socket, server_side=True)
 
     #secure_server = context.wrap_socket(server, server_side=True)
     while True:

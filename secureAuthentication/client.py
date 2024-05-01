@@ -4,20 +4,20 @@ import ssl
 def client_start():
 
     HOST = "127.0.0.1"
-    port = 443
+    port = 54321
 
-    #context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    context = ssl.create_default_context()
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    #context = ssl.create_default_context()
     context.load_verify_locations('selfsigned.crt')
     context.check_hostname = False
     print(ssl.OPENSSL_VERSION)
 
     try:
-        #client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #client.connect((HOST, port))
-        #secure_client = context.wrap_socket(client, server_hostname=HOST)
-        client_socket = socket.create_connection((HOST, port))
-        secure_client = context.wrap_socket(client_socket, server_hostname=HOST)
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect((HOST, port))
+        secure_client = context.wrap_socket(client, server_hostname=HOST)
+        #client_socket = socket.create_connection((HOST, port))
+        #secure_client = context.wrap_socket(client_socket, server_hostname=HOST)
         print("Socket successfully created")
     except socket.error as err:
         print("socket creation failed with error %s" % (err))
