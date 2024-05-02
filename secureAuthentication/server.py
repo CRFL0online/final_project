@@ -2,6 +2,8 @@ import socket
 import threading
 import random
 import hashlib
+import Cryptodome
+from Cryptodome.Cipher import AES
 
 
 HOST = "127.0.0.1"
@@ -27,7 +29,8 @@ def start_dh(client_socket):
     peer_shared_key = int(peer_shared_key)
 
     if (shared_key == peer_shared_key):
-        key = hashlib.sha256(shared_key.to_bytes(32, byteorder = 'big')).hexdigest()
+        #key = hashlib.sha256(shared_key.to_bytes(32, byteorder = 'big')).hexdigest()
+        key = shared_key.to_bytes(32, byteorder='big')
         return (key, True)
     else:
         return (None, False)
@@ -87,6 +90,26 @@ def main_client(client_socket, addr):
             username = client_socket.recv(1024).decode("utf-8")
             client_socket.send("Insert Password:".encode("utf-8"))
             password = client_socket.recv(1024).decode("utf-8")
+            """
+            client_socket.send("Insert Username:".encode("utf-8"))
+            username_cipher= client_socket.recv(1024)
+            tag = client_socket.recv(1024)
+            nonce = client_socket.recv(1024)
+            cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
+            plaintext = cipher.decrypt(username_cipher)
+            username = plaintext.decode("utf-8")
+            #print(username)
+            #password = 'test'
+            #print(password)
+            
+            client_socket.send("Insert Password:".encode("utf-8"))
+            password_cipher = client_socket.recv(1024)
+            tag = client_socket.recv(1024)
+            nonce = client_socket.recv(1024)
+            cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
+            plaintext = cipher.decrypt(password_cipher)
+            password = plaintext.decode("utf-8")
+            """
             if check_credentials(username, password):
                 print("Client connected")
                 client_socket.send("Login successful".encode("utf-8"))
@@ -104,6 +127,7 @@ def main_client(client_socket, addr):
                     break
         except Exception as e:
             print(f"Error handling connection from {addr}: {e}")
+        break
 
     client_socket.close()
     print("Server Closed")
@@ -133,6 +157,7 @@ def check_credentials(username, password):
             if stored_username == username and stored_password == password:
                 file.close()
                 return True
+            line=""
         file.close()
     return False
 
@@ -142,8 +167,8 @@ def handle_client(client_socket, addr):
     while True:
         response = client_socket.recv(1024)
         response = response.decode("utf-8")
-        if response.lower == "close":
-            client_socket.close()
+        if response.lower() == "close":
+            #client_socket.close()
             print(f"Client connection at address {addr} closed")
             return 0
         else:

@@ -1,6 +1,8 @@
 import socket
 import random
 import hashlib
+from Cryptodome.Cipher import AES
+
 
 
 def start_diffie(client):
@@ -22,7 +24,8 @@ def start_diffie(client):
     client.send(str(shared_key).encode("utf-8"))
 
     if (shared_key == peer_shared_key):
-        key = hashlib.sha256(shared_key.to_bytes(32, byteorder='big')).hexdigest()
+        #key = hashlib.sha256(shared_key.to_bytes(32, byteorder='big')).hexdigest()
+        key = shared_key.to_bytes(32, byteorder='big')
         return (key, True)
     else:
         return (None, False)
@@ -61,7 +64,7 @@ def client_start():
         #1. Login state/2 successful login(user can use the server)/3 login failure (user is kicked out from the server)
         prompt = client.recv(1024).decode("utf-8")
         if(prompt == "Insert Username:"):
-            print(prompt)             
+            print(prompt)
             data = input()
             client.send(data.encode("utf-8"))
             prompt = client.recv(1024).decode("utf-8")
@@ -70,6 +73,28 @@ def client_start():
             client.send(data.encode("utf-8"))
             prompt = client.recv(1024).decode("utf-8")
 
+            """
+            print(prompt)
+            data = input()
+            data = data.encode("utf-8")
+            cipher = AES.new(key, AES.MODE_EAX)
+            nonce = cipher.nonce
+            ciphertext, tag = cipher.encrypt_and_digest(data)
+            client.send(ciphertext)
+            client.send(tag)
+            client.send(nonce)
+
+            prompt = client.recv(1024).decode("utf-8")
+            print(prompt)
+            data = input()
+            data = data.encode("utf-8")
+            cipher = AES.new(key, AES.MODE_EAX)
+            nonce = cipher.nonce
+            ciphertext, tag = cipher.encrypt_and_digest(data)
+            client.send(ciphertext)
+            client.send(tag)
+            client.send(nonce)
+            """
         if (prompt == "Login successful"):
             while True:
                 data = input("Enter message  -  ('Close' to close connection):  ")
@@ -94,6 +119,7 @@ def client_start():
                 print("User Registered")
             else:
                 break
+        break
     # close client socket (connection to the server)
     client.close()
     print("Connection to server closed")
