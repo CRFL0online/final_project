@@ -9,7 +9,7 @@ def create_self_signed_cert(cert_dir):
     key_file = os.path.join(cert_dir, "private.key")
 
     k = crypto.PKey()
-    k.generate_key(crypto.TYPE_RSA, 1024)
+    k.generate_key(crypto.TYPE_RSA, 2048)
 
     cert = crypto.X509()
     cert.get_subject().C = "US"
@@ -33,5 +33,5 @@ def create_self_signed_cert(cert_dir):
 
     print("Certificates created")
 
-create_self_signed_cert("C:\\Users\\migue\\PycharmProjects\\final_project\\secureAuthentication")
-
+#create_self_signed_cert("C:\\Users\\migue\\PycharmProjects\\final_project\\secureAuthentication")
+create_self_signed_cert("./")

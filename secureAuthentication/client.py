@@ -1,9 +1,7 @@
 import socket
 import random
-import hashlib
+import ssl
 from Cryptodome.Cipher import AES
-
-
 
 def start_diffie(client):
     p = client.recv(1024).decode("utf-8")
@@ -24,7 +22,6 @@ def start_diffie(client):
     client.send(str(shared_key).encode("utf-8"))
 
     if (shared_key == peer_shared_key):
-        #key = hashlib.sha256(shared_key.to_bytes(32, byteorder='big')).hexdigest()
         key = shared_key.to_bytes(32, byteorder='big')
         return (key, True)
     else:
@@ -35,17 +32,14 @@ def client_start():
     HOST = "127.0.0.1"
     port = 54321
 
-    """
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect((HOST, port))
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    #context = ssl.create_default_context()
     context.load_verify_locations('selfsigned.crt')
     context.check_hostname = False
-    print(ssl.OPENSSL_VERSION)
-    """
+    client = context.wrap_socket(client, server_hostname=HOST)
 
     try:
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect((HOST, port))
         #secure_client = context.wrap_socket(client, server_hostname=HOST)
         #client_socket = socket.create_connection((HOST, port))
         #secure_client = context.wrap_socket(client_socket, server_hostname=HOST)
@@ -59,11 +53,15 @@ def client_start():
         return 0
     print("Authenticated")
 
+    flag = False
     while True:
+        if flag:
+            break
         #Three states
         #1. Login state/2 successful login(user can use the server)/3 login failure (user is kicked out from the server)
         prompt = client.recv(1024).decode("utf-8")
-        if(prompt == "Insert Username:"):
+        if (prompt == "Insert Username:"):
+            """
             print(prompt)
             data = input()
             client.send(data.encode("utf-8"))
@@ -94,15 +92,21 @@ def client_start():
             client.send(ciphertext)
             client.send(tag)
             client.send(nonce)
-            """
+        if (prompt == "exists"):
+            print("Client is already connected")
         if (prompt == "Login successful"):
             while True:
                 data = input("Enter message  -  ('Close' to close connection):  ")
                 client.send(data.encode("utf-8"))
                 if (data.lower() == "close"):
+                    flag = True
                     break
                 response = client.recv(1024)
                 response = response.decode("utf-8")
+                if response == "Timed out":
+                    print("Session expiration, connection closed")
+                    flag = True
+                    break
                 print(response)
         elif (prompt == "Login failure"):
             print("Login Failure")
@@ -119,7 +123,6 @@ def client_start():
                 print("User Registered")
             else:
                 break
-        break
     # close client socket (connection to the server)
     client.close()
     print("Connection to server closed")
